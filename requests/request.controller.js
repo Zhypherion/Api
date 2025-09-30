@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const requestService = require('./request.service');
-
+const db = require('_helpers/db'); // 👈 ADD THIS LINE
 // Routes
 router.get('/', getAll);
 router.get('/:id', getById);

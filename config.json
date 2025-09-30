@@ -1,10 +1,10 @@
 ﻿{
     "database": {
-        "host": "localhost",
-        "port": 3306,
-        "user": "root",
-        "password": "root",
-        "database": "node-mysql-signup-verification-api-latest"
+        "host": "mysql-2788054d-luckybow1232-e42e.k.aivencloud.com",
+        "port": 25699,
+        "user": "avnadmin",
+        "password": "AVNS_ZXM1EMCO9-ZIZ3yBMRp",
+        "database": "defaultdb"
     },
     "secret": "280062ee-c5f2-43d1-bafb-ecf1f7901952",
     "emailFrom": "info@node-mysql-signup-verification-api.com",
@@ -13,7 +13,7 @@
         "port": 587,
         "auth": {
             "user": "mohamed.swift31@ethereal.email",
-            "pass": "3bTvCbEx7b9MFZdT8b"    
+            "pass": "3bTvCbEx7b9MFZdT8b"
         }
     }
-}   
+}
