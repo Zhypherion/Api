@@ -69,7 +69,8 @@
   
 
 
-const config = require('config.json');
+// const config = require('config.json');
+const config = require('../config')
 const mysql = require('mysql2/promise');
 const { Sequelize, DataTypes } = require('sequelize');
 const fs = require('fs'); // Required to read the certificate file
