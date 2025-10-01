@@ -205,10 +205,22 @@ const db = {};
 initialize();
 
 async function initialize() {
-    // --- 0. Load CA certificate as Buffer ---
-    // Use Buffer (no utf8) so MySQL SSL handshake works correctly
-    const caCertPath = path.join(__dirname, '../certs/ca.pem');
-    const caCert = fs.readFileSync(caCertPath);
+    // --- 0. Load CA certificate ---
+    let caCert;
+    try {
+        if (process.env.MYSQL_SSL_CA) {
+            // Use CA from environment (deployment)
+            caCert = Buffer.from(process.env.MYSQL_SSL_CA, 'base64');
+        } else {
+            // Fallback to local file (dev only)
+            const caCertPath = path.join(__dirname, '../certs/ca.pem');
+            if (fs.existsSync(caCertPath)) {
+                caCert = fs.readFileSync(caCertPath);
+            }
+        }
+    } catch (err) {
+        console.warn('⚠️ No CA certificate found, SSL may fail if required.');
+    }
 
     const { host, port, user, password, database } = config.database;
 
@@ -218,10 +230,7 @@ async function initialize() {
         port,
         user,
         password,
-        ssl: {
-            ca: caCert,
-            rejectUnauthorized: true
-        }
+        ssl: caCert ? { ca: caCert, rejectUnauthorized: true } : undefined
     };
 
     try {
@@ -240,12 +249,9 @@ async function initialize() {
         host,
         port,
         logging: false,
-        dialectOptions: {
-            ssl: {
-                ca: caCert,
-                rejectUnauthorized: true
-            }
-        }
+        dialectOptions: caCert
+            ? { ssl: { ca: caCert, rejectUnauthorized: true } }
+            : {}
     });
 
     // --- 3. Init Models ---
