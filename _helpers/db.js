@@ -209,15 +209,15 @@ async function initialize() {
     let caCert;
     try {
         if (process.env.MYSQL_SSL_CA) {
-            // Use CA from environment (deployment)
-            caCert = Buffer.from(process.env.MYSQL_SSL_CA, 'base64');
-        } else {
-            // Fallback to local file (dev only)
-            const caCertPath = path.join(__dirname, '../certs/ca.pem');
-            if (fs.existsSync(caCertPath)) {
-                caCert = fs.readFileSync(caCertPath);
-            }
-        }
+    // Decode Base64 back to PEM text
+    caCert = Buffer.from(process.env.MYSQL_SSL_CA, 'base64').toString('utf-8');
+} else {
+    // Fallback to local file (dev only)
+    const caCertPath = path.join(__dirname, '../certs/ca.pem');
+    if (fs.existsSync(caCertPath)) {
+        caCert = fs.readFileSync(caCertPath, 'utf-8');
+    }
+}
     } catch (err) {
         console.warn('⚠️ No CA certificate found, SSL may fail if required.');
     }
