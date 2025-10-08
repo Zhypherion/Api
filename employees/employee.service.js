@@ -431,157 +431,161 @@
 
 
 
-
 // file: employees/employee.service.js
 const db = require('_helpers/db');
 
 module.exports = {
-  getAll,
-  getById,
-  create,
-  update,
-  getNextEmployeeId,
-  transfer
+  getAll,
+  getById,
+  create,
+  update,
+  getNextEmployeeId,
+  transfer
 };
 
 // ===== Service Methods =====
 
 async function getAll() {
-  const employees = await db.Employee.findAll({
-    include: [
-      {
-        model: db.Account, as: 'account',
-        attributes: ['id', 'email', 'status']
-      },
-      {
-        model: db.Department, as: 'department',
-        attributes: ['id', 'name']
-      }
-    ],
-    order: [['employeeId', 'ASC']]
-  });
+  const employees = await db.Employee.findAll({
+    include: [
+      {
+        model: db.Account, as: 'account',
+        attributes: ['id', 'email', 'status']
+      },
+      {
+        model: db.Department, as: 'department',
+        attributes: ['id', 'name']
+      }
+    ],
+    order: [['employeeId', 'ASC']]
+  });
 
-  return employees.map(emp => ({
-    id: emp.id,
-    accountId: emp.accountId,
-    account: emp.account ? {
-      id: emp.account.id,
-      email: emp.account.email,
-      status: emp.account.status
-    } : null,
-    employeeId: emp.employeeId,
-    position: emp.position,
-    departmentId: emp.departmentId,
-    department: emp.department ? emp.department.name : null,
-    hireDate: emp.hireDate,
-    status: emp.status
-  }));
+  return employees.map(emp => ({
+    id: emp.id,
+    accountId: emp.accountId,
+    account: emp.account ? {
+      id: emp.account.id,
+      email: emp.account.email,
+      status: emp.account.status
+    } : null,
+    employeeId: emp.employeeId,
+    position: emp.position,
+    departmentId: emp.departmentId,
+    department: emp.department ? emp.department.name : null,
+    hireDate: emp.hireDate,
+    status: emp.status
+  }));
 }
 
 async function getById(id) {
-  return await db.Employee.findOne({
-    where: { employeeId: id },
-    include: [
-      {
-        model: db.Account,
-        as: 'account',
-        attributes: ['id', 'email', 'status']
-      },
-      {
-        model: db.Department,
-        as: 'department',
-        attributes: ['id', 'name']
-      }
-    ]
-  });
+  return await db.Employee.findOne({
+    where: { employeeId: id },
+    include: [
+      {
+        model: db.Account,
+        as: 'account',
+        attributes: ['id', 'email', 'status']
+      },
+      {
+        model: db.Department,
+        as: 'department',
+        attributes: ['id', 'name']
+      }
+    ]
+  });
 }
 
 async function getNextEmployeeId() {
-  const last = await db.Employee.findOne({
-    order: [['employeeId', 'DESC']]
-  });
+  const last = await db.Employee.findOne({
+    order: [['employeeId', 'DESC']]
+  });
 
-  let nextNumber = 1;
-  if (last) {
-    const lastNum = parseInt(last.employeeId?.replace('EMP', '')) || 0;
-    nextNumber = lastNum + 1;
-  }
+  let nextNumber = 1;
+  if (last) {
+    const lastNum = parseInt(last.employeeId?.replace('EMP', '')) || 0;
+    nextNumber = lastNum + 1;
+  }
 
-  return `EMP${String(nextNumber).padStart(3, '0')}`;
+  return `EMP${String(nextNumber).padStart(3, '0')}`;
 }
 
 async function create(params) {
-  if (!params.accountId) throw 'Employee must be linked to an account';
+  if (!params.accountId) throw 'Employee must be linked to an account';
 
-  const account = await db.Account.findByPk(params.accountId);
-  if (!account) throw 'Account not found';
+  const account = await db.Account.findByPk(params.accountId);
+  if (!account) throw 'Account not found';
 
-  let departmentId = null;
+  // 🚫 Prevent duplicate employee per account
+  const existing = await db.Employee.findOne({ where: { accountId: params.accountId } });
+  if (existing) throw `An employee already exists for this account (${account.email}).`;
 
-  if (params.department) {
-    const [department] = await db.Department.findOrCreate({
-      where: { name: params.department },
-      defaults: { description: '' }
-    });
-    departmentId = department.id;
-  } else if (params.departmentId) {
-    const department = await db.Department.findByPk(params.departmentId);
-    if (!department) throw 'Department not found';
-    departmentId = department.id;
-  }
+  let departmentId = null;
 
-  return await db.Employee.create({
-    accountId: account.id,
-    position: params.position,
-    departmentId: departmentId,
-    hireDate: params.hireDate,
-    status: params.status
-  });
+  if (params.department) {
+    const [department] = await db.Department.findOrCreate({
+      where: { name: params.department },
+      defaults: { description: '' }
+    });
+    departmentId = department.id;
+  } else if (params.departmentId) {
+    const department = await db.Department.findByPk(params.departmentId);
+    if (!department) throw 'Department not found';
+    departmentId = department.id;
+  }
+
+  return await db.Employee.create({
+    employeeId: params.employeeId, // include this if frontend sends generated ID
+    accountId: account.id,
+    position: params.position,
+    departmentId: departmentId,
+    hireDate: params.hireDate,
+    status: params.status
+  });
 }
 
 async function update(id, params) {
-  const employee = await db.Employee.findOne({ where: { employeeId: id } });
-  if (!employee) throw 'Employee not found';
-  Object.assign(employee, params);
-  await employee.save();
-  return employee;
+  const employee = await db.Employee.findOne({ where: { employeeId: id } });
+  if (!employee) throw 'Employee not found';
+  Object.assign(employee, params);
+  await employee.save();
+  return employee;
 }
 
 // ✅ Transfer employee to another department (ID or Name works)
 async function transfer(id, { departmentId }) {
-  const employee = await db.Employee.findOne({ where: { employeeId: id } });
-  if (!employee) throw 'Employee not found';
+  const employee = await db.Employee.findOne({ where: { employeeId: id } });
+  if (!employee) throw 'Employee not found';
 
-  // 🔑 Get old department for the log
-  const oldDepartment = employee.departmentId ? await db.Department.findByPk(employee.departmentId) : null;
-  const oldDepartmentName = oldDepartment ? oldDepartment.name : 'N/A';
+  // 🔑 Get old department for the log
+  const oldDepartment = employee.departmentId ? await db.Department.findByPk(employee.departmentId) : null;
+  const oldDepartmentName = oldDepartment ? oldDepartment.name : 'N/A';
 
-  let department;
+  let department;
 
-  if (isNaN(departmentId)) {
-    // if it's a string → treat as department name
-    [department] = await db.Department.findOrCreate({
-      where: { name: departmentId },
-      defaults: { description: '' }
-    });
-  } else {
-    // if it's a number → find by PK
-    department = await db.Department.findByPk(departmentId);
-  }
+  if (isNaN(departmentId)) {
+    // if it's a string → treat as department name
+    [department] = await db.Department.findOrCreate({
+      where: { name: departmentId },
+      defaults: { description: '' }
+    });
+  } else {
+    // if it's a number → find by PK
+    department = await db.Department.findByPk(departmentId);
+  }
 
-  if (!department) throw 'Department not found';
+  if (!department) throw 'Department not found';
 
-  employee.departmentId = department.id;
-  await employee.save();
+  employee.departmentId = department.id;
+  await employee.save();
   
   // 🔑 NEW: Create a Workflow log for the department transfer
   await db.Workflow.create({
-      type: 'Department Transfer', 
-      details: `Employee ${id} transferred from ${oldDepartmentName} to ${department.name}.`,
-      status: 'Approved', // Mark the change as completed
-      employeeId: employee.id, 
-      requestId: null
+    type: 'Department Transfer', 
+    details: `Employee ${id} transferred from ${oldDepartmentName} to ${department.name}.`,
+    status: 'Approved', // Mark the change as completed
+    employeeId: employee.id, 
+    requestId: null
   });
 
-  return await getById(id);
+  return await getById(id);
 }
