@@ -20,6 +20,11 @@ app.use('/employees', require('./employees/employees.controller'));  // ✅ enab
 app.use('/requests', require('./requests/request.controller'));  // ✅ enable requests API
 app.use('/workflows', require('./workflows/workflow.controller'));  // ✅ enable workflows API
 app.use('/departments', require('./departments/departments.controller'));
+app.use('/positions', require('./positions/position.controller'));
+
+
+
+
 
 // swagger docs route
 app.use('/api-docs', require('_helpers/swagger'));
