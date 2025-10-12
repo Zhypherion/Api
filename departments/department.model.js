@@ -19,6 +19,11 @@ function model(sequelize) {
             foreignKey: 'departmentId',
             as: 'employees'
         });
+
+        Department.hasMany(models.Position, {
+    foreignKey: 'departmentId',
+    as: 'positions'
+  });
     };
 
     return Department;

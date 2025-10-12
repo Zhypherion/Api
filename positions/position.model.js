@@ -10,5 +10,35 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: 'Worker'
     }
   });
+
+Position.associate = (models) => {
+    Position.belongsTo(models.Department, {
+      foreignKey: 'departmentId',
+      as: 'department'
+    });
+  };
   return Position;
 };
+
+
+
+
+// module.exports = (sequelize) => {
+//   const { DataTypes } = require('sequelize');
+
+//   const Position = sequelize.define('Position', {
+//     name: { type: DataTypes.STRING, allowNull: false },
+//     status: { type: DataTypes.STRING, allowNull: false, defaultValue: 'Active' },
+//     hierarchyLevel: { type: DataTypes.STRING, allowNull: false },
+//     departmentId: { type: DataTypes.INTEGER, allowNull: true }
+//   });
+
+//   Position.associate = (models) => {
+//     Position.belongsTo(models.Department, {
+//       foreignKey: 'departmentId',
+//       as: 'department'
+//     });
+//   };
+
+//   return Position;
+// };

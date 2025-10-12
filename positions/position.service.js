@@ -9,7 +9,16 @@ module.exports = {
 };
 
 async function getAll() {
-  return await db.Position.findAll({ order: [['hierarchyLevel', 'ASC']] });
+  return await db.Position.findAll({
+    include: [
+      {
+        model: db.Department,
+        as: 'department', // alias (must match your association)
+        attributes: ['id', 'name']
+      }
+    ],
+    order: [['hierarchyLevel', 'ASC']]
+  });
 }
 
 async function getById(id) {

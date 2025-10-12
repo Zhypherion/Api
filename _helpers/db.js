@@ -403,7 +403,8 @@ async function initialize() {
 
 
     // --- 5. Sync Models ---
-    await sequelize.sync({ alter: true });
+    await sequelize.sync();
+
     console.log('✅ Sequelize models synced.');
 }
 
