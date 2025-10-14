@@ -4,6 +4,7 @@ module.exports = (sequelize, DataTypes) => {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     name: { type: DataTypes.STRING, allowNull: false },
     status: { type: DataTypes.STRING, allowNull: false, defaultValue: 'Active' },
+    departmentId: { type: DataTypes.INTEGER, allowNull: true },
     hierarchyLevel: { 
       type: DataTypes.ENUM('Worker', 'Supervisor', 'Manager'),
       allowNull: false,
