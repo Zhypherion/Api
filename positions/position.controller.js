@@ -18,7 +18,8 @@ function createSchema(req, res, next) {
   const schema = Joi.object({
     name: Joi.string().required(),
     status: Joi.string().valid('Active', 'Inactive').default('Active'),
-    hierarchyLevel: Joi.string().valid('Worker', 'Supervisor', 'Manager').required()
+    hierarchyLevel: Joi.string().valid('Worker', 'Supervisor', 'Manager').required(),
+    departmentId: Joi.number().required() 
   });
   validateRequest(req, next, schema);
 }
