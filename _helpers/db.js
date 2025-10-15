@@ -402,6 +402,10 @@ async function initialize() {
     db.Employee.belongsTo(db.Position, { foreignKey: 'positionId', as: 'positionInfo' });
 
 
+    // // 👇 ADD: Position <-> Workflow association
+    // db.Workflow.hasMany(db.Position, { foreignKey: 'workflowId', as: 'positions' });
+    // db.Position.belongsTo(db.Workflow, { foreignKey: 'workflowId', as: 'workflow' });
+
     // --- 5. Sync Models ---
     await sequelize.sync();
 

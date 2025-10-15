@@ -131,6 +131,11 @@ async function getAll() {
         as: 'department', // must match association alias
         attributes: ['id', 'name']
       }
+      // {
+      //   model: db.Workflow,
+      //   as: 'workflow',
+      //   attributes: ['id', 'name'] 
+      // }
     ],
     order: [['hierarchyLevel', 'ASC']]
   });
@@ -144,6 +149,11 @@ async function getById(id) {
         as: 'department',
         attributes: ['id', 'name']
       }
+      // {
+      //   model: db.Workflow,
+      //   as: 'workflow',
+      //   attributes: ['id', 'name'] 
+      // }
     ]
   });
 }
@@ -154,6 +164,7 @@ async function create(params) {
     status: params.status,
     hierarchyLevel: params.hierarchyLevel,
     departmentId: params.departmentId // Must be a valid ID
+    //  workflowId: params.workflowId
   });
 
   return await db.Position.findByPk(position.id, {
@@ -163,6 +174,11 @@ async function create(params) {
         as: 'department',
         attributes: ['id', 'name']
       }
+      // {
+      //   model: db.Workflow,
+      //   as: 'workflow',
+      //   attributes: ['id', 'name'] 
+      // }
     ]
   });
 }

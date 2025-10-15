@@ -490,7 +490,11 @@ async function getById(id) {
         model: db.Department,
         as: 'department',
         attributes: ['id', 'name']
-      }
+      },
+      { model: db.Position,
+         as: 'position',
+          attributes: ['id', 'name', 'hierarchyLevel']
+      } // ✅ add this
     ]
   });
 }

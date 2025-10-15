@@ -19,7 +19,8 @@ function createSchema(req, res, next) {
     name: Joi.string().required(),
     status: Joi.string().valid('Active', 'Inactive').default('Active'),
     hierarchyLevel: Joi.string().valid('Worker', 'Supervisor', 'Manager').required(),
-    departmentId: Joi.number().required() 
+    departmentId: Joi.number().required(),
+    // workflowId: Joi.number().optional().allow(null) 
   });
   validateRequest(req, next, schema);
 }
@@ -28,7 +29,10 @@ function updateSchema(req, res, next) {
   const schema = Joi.object({
     name: Joi.string().empty(''),
     status: Joi.string().valid('Active', 'Inactive').empty(''),
-    hierarchyLevel: Joi.string().valid('Worker', 'Supervisor', 'Manager').empty('')
+    hierarchyLevel: Joi.string().valid('Worker', 'Supervisor', 'Manager').empty(''),
+    departmentId: Joi.number().empty('') // Assuming you added this
+    // // 👇 ADD: workflowId
+    // workflowId: Joi.number().optional().allow(null).empty('')
   });
   validateRequest(req, next, schema);
 }

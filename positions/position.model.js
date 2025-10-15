@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: 'Worker'
     }
+    // workflowId: { type: DataTypes.INTEGER, allowNull: true } // Assuming workflow is optional initiall
   });
 
 Position.associate = (models) => {
@@ -17,6 +18,10 @@ Position.associate = (models) => {
       foreignKey: 'departmentId',
       as: 'department'
     });
+    // Position.belongsTo(models.Workflow, {
+    //     foreignKey: 'workflowId',
+    //     as: 'workflow'
+    // });
   };
   return Position;
 };
