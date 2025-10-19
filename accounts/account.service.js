@@ -147,8 +147,13 @@ async function getAll() {
             {
                 model: db.Employee,
                 as: 'employees',   // must match association
-                attributes: ['employeeId', 'position', 'status'] 
-            }
+                attributes: ['employeeId', 'status'] 
+            },
+            {
+                        model: db.Position,          // ✅ join position table
+                        as: 'position',
+                        attributes: ['id', 'name']   // ✅ get readable position name
+                    }
         ]
     });
 
@@ -166,7 +171,7 @@ async function getAll() {
         // Handle plural employees
         employees: acc.employees ? acc.employees.map(emp => ({
             employeeId: emp.employeeId,
-            position: emp.position,
+            position: emp.position ? emp.position.name : null,
             status: emp.status
         })) : []
     }));
