@@ -399,7 +399,7 @@ async function initialize() {
     db.Position.belongsTo(db.Department, { foreignKey: 'departmentId', as: 'department' });
 
     db.Position.hasMany(db.Employee, { foreignKey: 'positionId', as: 'employees' });
-    db.Employee.belongsTo(db.Position, { foreignKey: 'positionId', as: 'positionInfo' });
+    db.Employee.belongsTo(db.Position, { foreignKey: 'positionId', as: 'position' });
 
 
     // // 👇 ADD: Position <-> Workflow association

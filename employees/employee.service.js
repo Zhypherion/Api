@@ -455,6 +455,11 @@ async function getAll() {
       {
         model: db.Department, as: 'department',
         attributes: ['id', 'name']
+      },
+       {
+        model: db.Position,          // ✅ Include Position properly
+        as: 'position',
+        attributes: ['id', 'name', 'hierarchyLevel']
       }
     ],
     order: [['employeeId', 'ASC']]
@@ -469,7 +474,8 @@ async function getAll() {
       status: emp.account.status
     } : null,
     employeeId: emp.employeeId,
-    position: emp.position,
+    positionId: emp.positionId, 
+    position: emp.position ? emp.position.name : '',
     departmentId: emp.departmentId,
     department: emp.department ? emp.department.name : null,
     hireDate: emp.hireDate,
