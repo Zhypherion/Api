@@ -1,3 +1,4 @@
+//request.model.js
 module.exports = (sequelize, DataTypes) => {
   const Request = sequelize.define('Request', {
     type: { type: DataTypes.ENUM('Equipment', 'Leave', 'Resource'),allowNull: false },
