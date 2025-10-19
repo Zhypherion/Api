@@ -540,7 +540,7 @@ async function create(params) {
   return await db.Employee.create({
     employeeId: params.employeeId, // include this if frontend sends generated ID
     accountId: account.id,
-    position: params.position,
+    positionId: params.positionId,
     departmentId: departmentId,
     hireDate: params.hireDate,
     status: params.status

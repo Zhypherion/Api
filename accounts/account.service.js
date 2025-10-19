@@ -247,7 +247,7 @@ async function hash(password) {
 
 // JWT generation
 function generateJwtToken(account) {
-    return jwt.sign({ sub: account.id, id: account.id }, config.secret, { expiresIn: '12h' });
+    return jwt.sign({ sub: account.id, id: account.id }, config.secret, { expiresIn: '15m' });
 }
 
 // Refresh token creation
