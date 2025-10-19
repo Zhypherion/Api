@@ -230,9 +230,8 @@ module.exports = router;
 function createSchema(req, res, next) {
   const schema = Joi.object({
     accountId: Joi.number().required(),
-    position: Joi.string().required(),
-    department: Joi.string().optional(),
-    departmentId: Joi.number().optional(),
+    positionId: Joi.number().required(),
+    departmentId: Joi.number().required(),
     hireDate: Joi.date().required(),
     status: Joi.string().valid('Active', 'Inactive').default('Active')
   });
@@ -242,14 +241,14 @@ function createSchema(req, res, next) {
 function updateSchema(req, res, next) {
   const schema = Joi.object({
     accountId: Joi.number().empty(''),
-    position: Joi.string().empty(''),
-    department: Joi.string().empty(''),
+    positionId: Joi.number().empty(''),
     departmentId: Joi.number().empty(''),
     hireDate: Joi.date().empty(''),
     status: Joi.string().valid('Active', 'Inactive').empty('')
   });
   validateRequest(req, next, schema);
 }
+
 
 // ✅ transfer schema (allow ID or name)
 function transferSchema(req, res, next) {
