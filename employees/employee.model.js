@@ -110,7 +110,8 @@ function model(sequelize) {
     Employee.belongsTo(models.Department, { foreignKey: 'departmentId', as: 'department' });
 
     // ✅ correct place for Position association
-    Employee.belongsTo(models.Position, { foreignKey: 'positionId', as: 'position' });
+    Employee.belongsTo(db.Position, { as: 'position', foreignKey: 'positionId' });
+
 
     // Also: Department has many employees
     models.Department.hasMany(Employee, { foreignKey: 'departmentId', as: 'employees' });

@@ -18,6 +18,8 @@ Position.associate = (models) => {
       foreignKey: 'departmentId',
       as: 'department'
     });
+    Position.hasMany(db.Employee, { as: 'employees', foreignKey: 'positionId' });
+
     // Position.belongsTo(models.Workflow, {
     //     foreignKey: 'workflowId',
     //     as: 'workflow'
