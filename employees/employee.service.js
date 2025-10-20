@@ -431,7 +431,187 @@
 
 
 
-// file: employees/employee.service.js
+// // file: employees/employee.service.js
+// const db = require('_helpers/db');
+
+// module.exports = {
+//   getAll,
+//   getById,
+//   create,
+//   update,
+//   getNextEmployeeId,
+//   transfer
+// };
+
+// // ===== Service Methods =====
+
+// async function getAll() {
+//   const employees = await db.Employee.findAll({
+//     include: [
+//       {
+//         model: db.Account, as: 'account',
+//         attributes: ['id', 'email', 'status']
+//       },
+//       {
+//         model: db.Department, as: 'department',
+//         attributes: ['id', 'name']
+//       },
+//        {
+//         model: db.Position,          // ✅ Include Position properly
+//         as: 'position',
+//         attributes: ['id', 'name', 'hierarchyLevel']
+//       }
+//     ],
+//     order: [['employeeId', 'ASC']]
+//   });
+
+//   return employees.map(emp => ({
+//     id: emp.id,
+//     accountId: emp.accountId,
+//     account: emp.account ? {
+//       id: emp.account.id,
+//       email: emp.account.email,
+//       status: emp.account.status
+//     } : null,
+//     employeeId: emp.employeeId,
+//     positionId: emp.positionId, 
+//     position: emp.position ? emp.position.name : '',
+//     departmentId: emp.departmentId,
+//     department: emp.department ? emp.department.name : null,
+//     hireDate: emp.hireDate,
+//     status: emp.status
+//   }));
+// }
+
+// async function getById(id) {
+//   return await db.Employee.findOne({
+//     where: { employeeId: id },
+//     include: [
+//       {
+//         model: db.Account,
+//         as: 'account',
+//         attributes: ['id', 'email', 'status']
+//       },
+//       {
+//         model: db.Department,
+//         as: 'department',
+//         attributes: ['id', 'name']
+//       },
+//       { model: db.Position,
+//          as: 'position',
+//           attributes: ['id', 'name', 'hierarchyLevel']
+//       } // ✅ add this
+//     ]
+//   });
+// }
+
+// async function getNextEmployeeId() {
+//   const last = await db.Employee.findOne({
+//     order: [['employeeId', 'DESC']]
+//   });
+
+//   let nextNumber = 1;
+//   if (last) {
+//     const lastNum = parseInt(last.employeeId?.replace('EMP', '')) || 0;
+//     nextNumber = lastNum + 1;
+//   }
+
+//   return `EMP${String(nextNumber).padStart(3, '0')}`;
+// }
+
+// async function create(params) {
+//   if (!params.accountId) throw 'Employee must be linked to an account';
+
+//   const account = await db.Account.findByPk(params.accountId);
+//   if (!account) throw 'Account not found';
+
+//   // 🚫 Prevent duplicate employee per account
+//   const existing = await db.Employee.findOne({ where: { accountId: params.accountId } });
+//   if (existing) throw `An employee already exists for this account (${account.email}).`;
+
+//   let departmentId = null;
+
+//   if (params.department) {
+//     const [department] = await db.Department.findOrCreate({
+//       where: { name: params.department },
+//       defaults: { description: '' }
+//     });
+//     departmentId = department.id;
+//   } else if (params.departmentId) {
+//     const department = await db.Department.findByPk(params.departmentId);
+//     if (!department) throw 'Department not found';
+//     departmentId = department.id;
+//   }
+
+//   return await db.Employee.create({
+//     employeeId: params.employeeId, // include this if frontend sends generated ID
+//     accountId: account.id,
+//     positionId: params.positionId,
+//     departmentId: departmentId,
+//     hireDate: params.hireDate,
+//     status: params.status
+//   });
+// }
+
+// async function update(id, params) {
+//   const employee = await db.Employee.findOne({ where: { employeeId: id } });
+//   if (!employee) throw 'Employee not found';
+//   Object.assign(employee, params);
+//   await employee.save();
+//   return employee;
+// }
+
+// // ✅ Transfer employee to another department (ID or Name works)
+// async function transfer(id, { departmentId }) {
+//   const employee = await db.Employee.findOne({ where: { employeeId: id } });
+//   if (!employee) throw 'Employee not found';
+
+//   // 🔑 Get old department for the log
+//   const oldDepartment = employee.departmentId ? await db.Department.findByPk(employee.departmentId) : null;
+//   const oldDepartmentName = oldDepartment ? oldDepartment.name : 'N/A';
+
+//   let department;
+
+//   if (isNaN(departmentId)) {
+//     // if it's a string → treat as department name
+//     [department] = await db.Department.findOrCreate({
+//       where: { name: departmentId },
+//       defaults: { description: '' }
+//     });
+//   } else {
+//     // if it's a number → find by PK
+//     department = await db.Department.findByPk(departmentId);
+//   }
+
+//   if (!department) throw 'Department not found';
+
+//   employee.departmentId = department.id;
+//   await employee.save();
+  
+//   // 🔑 NEW: Create a Workflow log for the department transfer
+//   await db.Workflow.create({
+//     type: 'Department Transfer', 
+//     details: `Employee ${id} transferred from ${oldDepartmentName} to ${department.name}.`,
+//     status: 'Approved', // Mark the change as completed
+//     employeeId: employee.id, 
+//     requestId: null
+//   });
+
+//   return await getById(id);
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
 const db = require('_helpers/db');
 
 module.exports = {
@@ -456,8 +636,8 @@ async function getAll() {
         model: db.Department, as: 'department',
         attributes: ['id', 'name']
       },
-       {
-        model: db.Position,          // ✅ Include Position properly
+      {
+        model: db.Position,
         as: 'position',
         attributes: ['id', 'name', 'hierarchyLevel']
       }
@@ -474,7 +654,7 @@ async function getAll() {
       status: emp.account.status
     } : null,
     employeeId: emp.employeeId,
-    positionId: emp.positionId, 
+    positionId: emp.positionId,
     position: emp.position ? emp.position.name : '',
     departmentId: emp.departmentId,
     department: emp.department ? emp.department.name : null,
@@ -497,10 +677,11 @@ async function getById(id) {
         as: 'department',
         attributes: ['id', 'name']
       },
-      { model: db.Position,
-         as: 'position',
-          attributes: ['id', 'name', 'hierarchyLevel']
-      } // ✅ add this
+      {
+        model: db.Position,
+        as: 'position',
+        attributes: ['id', 'name', 'hierarchyLevel']
+      }
     ]
   });
 }
@@ -543,21 +724,53 @@ async function create(params) {
     departmentId = department.id;
   }
 
-  return await db.Employee.create({
-    employeeId: params.employeeId, // include this if frontend sends generated ID
+  const employee = await db.Employee.create({
+    employeeId: params.employeeId,
     accountId: account.id,
     positionId: params.positionId,
     departmentId: departmentId,
     hireDate: params.hireDate,
     status: params.status
   });
+
+  // ✅ Create a workflow entry for onboarding
+  await db.Workflow.create({
+    type: 'Onboarding',
+    details: `Employee ${employee.employeeId} (${account.email}) onboarded to department ID ${departmentId}.`,
+    status: 'Approved',
+    employeeId: employee.id,
+    requestId: null
+  });
+
+  return employee;
 }
 
 async function update(id, params) {
   const employee = await db.Employee.findOne({ where: { employeeId: id } });
   if (!employee) throw 'Employee not found';
+
+  const oldData = employee.toJSON();
   Object.assign(employee, params);
   await employee.save();
+
+  // ✅ Detect and log changes
+  const changes = [];
+  for (const key of Object.keys(params)) {
+    if (oldData[key] !== params[key]) {
+      changes.push(`${key}: '${oldData[key]}' → '${params[key]}'`);
+    }
+  }
+
+  if (changes.length > 0) {
+    await db.Workflow.create({
+      type: 'Employee Update',
+      details: `Employee ${id} updated: ${changes.join(', ')}`,
+      status: 'Approved',
+      employeeId: employee.id,
+      requestId: null
+    });
+  }
+
   return employee;
 }
 
@@ -573,13 +786,11 @@ async function transfer(id, { departmentId }) {
   let department;
 
   if (isNaN(departmentId)) {
-    // if it's a string → treat as department name
     [department] = await db.Department.findOrCreate({
       where: { name: departmentId },
       defaults: { description: '' }
     });
   } else {
-    // if it's a number → find by PK
     department = await db.Department.findByPk(departmentId);
   }
 
@@ -587,13 +798,13 @@ async function transfer(id, { departmentId }) {
 
   employee.departmentId = department.id;
   await employee.save();
-  
-  // 🔑 NEW: Create a Workflow log for the department transfer
+
+  // 🔑 Create a Workflow log for the department transfer
   await db.Workflow.create({
-    type: 'Department Transfer', 
+    type: 'Department Transfer',
     details: `Employee ${id} transferred from ${oldDepartmentName} to ${department.name}.`,
-    status: 'Approved', // Mark the change as completed
-    employeeId: employee.id, 
+    status: 'Approved',
+    employeeId: employee.id,
     requestId: null
   });
 
