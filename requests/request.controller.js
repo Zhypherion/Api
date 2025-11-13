@@ -80,16 +80,22 @@ const express = require('express');
 const router = express.Router();
 const requestService = require('./request.service');
 const db = require('_helpers/db');
+const authorize = require('_middleware/authorize');
+const Role = require('_helpers/role');
+
+
+// Add this route BEFORE router.get('/:id')
+router.get('/my', authorize(), getMyRequests);
 
 // Routes
-router.get('/', getAll);
-router.get('/:id', getById);
-router.post('/', create);
-router.put('/:id', update);
+router.get('/',authorize(), getAll);
+router.get('/:id',authorize(), getById);
+router.post('/',authorize(), create);
+router.put('/:id',authorize(), update);
 
 // ✅ NEW: Approve / Reject routes
-router.put('/:id/approve', approve);
-router.put('/:id/reject', reject);
+router.put('/:id/approve',authorize(), approve);
+router.put('/:id/reject',authorize(), reject);
 
 // extra helpers for dropdowns
 router.get('/helpers/active-employees', getActiveEmployeesRoute);
@@ -99,6 +105,17 @@ router.get('/types', getTypes);
 module.exports = router;
 
 // ------------------ ROUTE HANDLERS ------------------
+
+
+function getMyRequests(req, res, next) {
+  const accountId = req.user.id;
+  requestService.getByAccountId(accountId)
+    .then(requests => res.json(requests || []))
+
+    .catch(next);
+}
+
+
 
 function getAll(req, res, next) {
   requestService.getAll()
@@ -113,10 +130,28 @@ function getById(req, res, next) {
 }
 
 function create(req, res, next) {
-  requestService.create(req.body)
+  const accountId = req.user.id; // logged-in account
+  requestService.createForAccount(accountId, req.body)
     .then(request => res.json(request))
     .catch(next);
 }
+
+
+// function create(req, res, next) {
+//   const accountId = req.user.id;
+  
+//   // If employeeId is provided in body, use it (for admins)
+//   // Otherwise, use the logged-in account's employee
+//   if (req.body.employeeId) {
+//     requestService.create(req.body)
+//       .then(request => res.json(request))
+//       .catch(next);
+//   } else {
+//     requestService.createForAccount(accountId, req.body)
+//       .then(request => res.json(request))
+//       .catch(next);
+//   }
+// }
 
 function update(req, res, next) {
   requestService.update(req.params.id, req.body)

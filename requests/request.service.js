@@ -309,10 +309,48 @@ module.exports = {
   create,
   update,
   getActiveEmployees,
-  getAllEmployees
+  getAllEmployees,
+  getByAccountId, // 👈 new
+  createForAccount // ✅ ADD THIS
 };
 
 // ------------------ FUNCTIONS ------------------
+
+
+// ✅ Fetch requests by account
+async function getByAccountId(accountId) {
+  const employee = await db.Employee.findOne({ where: { accountId } });
+  if (!employee) throw new Error('No employee linked to this account');
+
+  const requests = await db.Request.findAll({
+    where: { employeeId: employee.id },
+    include: [
+      {
+        model: db.Employee,
+        as: 'employee',
+        include: [
+          { model: db.Account, as: 'account', attributes: ['id', 'email'] },
+          { model: db.Department, as: 'department', attributes: ['id', 'name'] },
+          { model: db.Position, as: 'position', attributes: ['id', 'name'] }
+        ]
+      }
+    ],
+    order: [['id', 'DESC']]
+  });
+
+  return requests;
+}
+
+
+async function createForAccount(accountId, params) {
+  const employee = await db.Employee.findOne({ where: { accountId } });
+  if (!employee) throw new Error('Employee record not found');
+
+  return await create({ ...params, employeeId: employee.id });
+}
+
+
+
 
 // ✅ Fetch all requests with their employees + account info
 async function getAll() {
